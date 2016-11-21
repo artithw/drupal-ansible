@@ -3,9 +3,31 @@
   gather_facts: False
 
   vars:
+    # db
     mysql_root_username: root
     mysql_root_password: p24HOXBdY9qfZg
-  
+    # server
+    apache_listen_port: 80
+    apache_listen_port_ssl: 443
+    servername: "local.dev"
+    documentroot: "/var/www/html"
+    apache_vhosts_filename: "vhosts.conf"
+    # composer
+    composer_path: /usr/local/bin/composer
+    composer_home_path: '~/.composer'
+    composer_home_owner: root
+    composer_home_group: root
+    # drush
+    drush_install_path: /usr/local/share/drush
+    drush_path: /usr/local/bin/drush
+    drush_version: 8.1.0
+
+  handlers:
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted
+
   tasks:
     - name: install python 2
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
@@ -18,7 +40,6 @@
       apt_repository: repo='ppa:ondrej/php'
                   state=present
                   update_cache=yes
-      sudo: true
 
     - name: PHP | install php packages
       apt: pkg={{ item }} state=installed
@@ -38,33 +59,31 @@
         - php7.0-intl
         - php7.0-bz2
         - php7.0-xml
-      sudo: true
 
-    - name: MySQL | install MySQL
+    - name: MySQL | Install MySQL
       apt: pkg={{ item }} state=installed
       with_items:
         - mysql-common
         - mysql-server
-      sudo: true
 
-    - name: Get MySQL version.
+    - name: MySQL | Get MySQL version.
       command: 'mysql --version'
       register: mysql_cli_version
       changed_when: false
 
-    - name: Disallow root login remotely
+    - name: MySQL | Disallow root login remotely
       command: 'mysql -NBe "{{ item }}"'
       with_items:
         - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
       changed_when: false
 
-    - name: Get list of hosts for the root user.
+    - name: MySQL | Get list of hosts for the root user.
       command: mysql -NBe 'SELECT Host FROM mysql.user WHERE User = "root" ORDER BY (Host="localhost") ASC'
       register: mysql_root_hosts
       changed_when: false
-      always_run: true
+      check_mode: no
 
-    - name: Update MySQL root password for localhost root account (5.7.x).
+    - name: MySQL | Update MySQL root password for localhost root account.
       shell: >
         mysql -u root -NBe
         'ALTER USER "{{ mysql_root_username }}"@"{{ item }}" IDENTIFIED WITH mysql_native_password BY "{{ mysql_root_password }}";'
@@ -72,10 +91,138 @@
 
         
     # Has to be after the root password assignment, for idempotency.
-    - name: Copy .my.cnf file with root password credentials.
+    - name: MySQL | Copy .my.cnf file with root password credentials.
       template:
         src: "./templates/user-my.cnf.j2"
         dest: "/root/.my.cnf"
         owner: root
         group: root
         mode: 0600
+
+    - name: Apache | Install Apache
+      apt: pkg={{ item }} state=installed
+      with_items:
+        - apache2
+        - apache2-utils
+        
+    - name: Apache | Ensure Apache is installed
+      apt: "name={{ item }} state=installed"
+      with_items:
+        - apache2
+        - apache2-utils
+        
+    - name: Apache | Enable some required modules
+      command: a2enmod rewrite
+      
+    - name: Apache | Add apache vhosts configuration.
+      template:
+        src: "./templates/vhosts.conf.j2"
+        dest: "/etc/apache2/sites-available/{{ apache_vhosts_filename }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart apache
+
+    - name: Apache | Add vhost symlink in sites-enabled.
+      file:
+        src: "/etc/apache2/sites-available/{{ apache_vhosts_filename }}"
+        dest: "/etc/apache2/sites-enabled/{{ apache_vhosts_filename }}"
+        state: link
+      notify: restart apache
+
+    - name: Drupal | Download Drupal
+      get_url: 
+        url: https://ftp.drupal.org/files/projects/drupal-7.52.tar.gz
+        dest: /tmp/drupal.tar.gz
+
+    - name: Drupal | Setup Drupal in docroot
+      unarchive:
+        src: /tmp/drupal.tar.gz
+        dest: "{{ documentroot }}"
+        copy: no
+        extra_opts: "--strip-components=1"
+
+
+    # Composer
+    - name: Composer | Set php_executable variable to a default if not defined.
+      set_fact:
+        php_executable: php
+        when: php_executable is not defined
+
+    - name: Composer | Check if Composer is installed.
+      stat: "path={{ composer_path }}"
+      register: composer_bin
+
+    - name: Composer | Download Composer installer.
+      get_url:
+        url: https://getcomposer.org/installer
+        dest: /tmp/composer-installer.php
+        mode: 0755
+      when: not composer_bin.stat.exists
+
+    - name: Composer | Run Composer installer.
+      command: >
+        {{ php_executable }} composer-installer.php
+        chdir=/tmp
+      when: not composer_bin.stat.exists
+
+    - name: Composer | Move Composer into globally-accessible location.
+      shell: >
+        mv /tmp/composer.phar {{ composer_path }}
+        creates={{ composer_path }}
+      when: not composer_bin.stat.exists
+
+    - name: Composer | Update Composer to latest version (if configured).
+      shell: >
+        {{ php_executable }} {{ composer_path }} self-update
+      register: composer_update
+      changed_when: "'Updating to version' in composer_update.stdout"
+
+    - name: Composer | Ensure composer directory exists.
+      file:
+        path: "{{ composer_home_path }}"
+        owner: "{{ composer_home_owner }}"
+        group: "{{ composer_home_group }}"
+        state: directory
+
+    # Drush
+    - name: Prepare install path
+      file:
+        path: "{{ drush_install_path }}"
+        state: directory
+      become: true
+  
+    - name: Drush | Check if requested Drush package file exists for download
+      # Returns HTTP status code (string) of dynamically created file path
+      command: curl -s -o /dev/null -w "%{http_code}" https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar
+      register: drush_phar_http_code
+      changed_when: false
+
+    - name: Drush | Download packaged Drush release
+      get_url:
+        url: https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar
+        dest: "{{ drush_install_path }}/drush"
+        mode: "a+x"
+      register: phar_download
+      when: drush_phar_http_code.stdout == "302"
+
+    - name: Drush | Create Drush symlink
+      file:
+        src: "{{ drush_install_path }}/drush"
+        dest: "{{ drush_path }}"
+        state: link
+      when: >
+        not phar_download.skipped|default(false)
+        and drush_phar_http_code.stdout == "302"
+      
+    # Lets Encrypt
+
+    # Varnish
+
+    # Firewall
+
+    # Setup cron
+
+    # Setup backup/restore
+
+    # Check for periodic updates

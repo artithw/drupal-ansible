@@ -1,0 +1,16 @@
+<VirtualHost *:{{ apache_listen_port }}>
+        ServerName {{ servername }}
+	DocumentRoot {{ documentroot }}
+	<Directory "{{ documentroot }}">
+	    AllowOverride All
+	    Options -Indexes +FollowSymLinks
+    	    Require all granted
+	</Directory>	
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	# SetEnv MYSQL_USER root
+	# SetEnv MYSQL_PASSWORD S3cr3+
+	# SetEnv MYSQL_HOST localhost
+	# SetEnv MYSQL_DATABASE dbname
+	# SetEnv SALTED_HASH aVjRmgr0GZhynB_itMX8aJAjeKdgJcvtb5E-8YOqAE
+</VirtualHost>
