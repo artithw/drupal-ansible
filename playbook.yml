@@ -7,4 +7,8 @@
   tasks:
     - include: mysql.yml
     - include: php.yml
+    - include: apache.yml
+    - include: extras.yml
+    - include: drupal.yml
+      
 

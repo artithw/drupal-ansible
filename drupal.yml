@@ -1,0 +1,14 @@
+---
+- name: Drupal | Get the latest stable version(7)
+  git:
+    repo: "https://github.com/drupal/drupal.git"
+    version: "7.56"
+    dest: /var/www/html/drupal
+
+# - name: Drupal | Get the source code from git
+
+# - name: Drupal | Restore if there is a DB snapsot
+
+# - name: Drupal | Drush site install if DB snapshot is absent
+
+# - name: Drupal | Run updates

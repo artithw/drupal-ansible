@@ -35,3 +35,6 @@ php7_packages:
   - php7.0-intl
   - php7.0-bz2
   - php7.0-xml
+
+drush_version: 8.1.12
+drush_phar_url: https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar

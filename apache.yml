@@ -1,0 +1,26 @@
+---
+- name: Apache | Install Apache
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - apache2
+    - apache2-utils
+
+- name: Apache | Enable modules
+  apache2_module:
+    state: present
+    name: rewrite
+
+- name: Apache | Copy over vhosts configuration
+  template:
+    src: templates/apache/vhosts.conf.j2
+    dest: "/etc/apache2/sites-available/drupal"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Apache | Enable site
+  file:
+    src: "/etc/apache2/sites-available/drupal"
+    dest: "/etc/apache2/sites-enabled/drupal"
+    state: link
+  
