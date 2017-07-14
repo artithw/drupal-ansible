@@ -1,0 +1,10 @@
+---
+- name: PHP | Add php-7.0 PPA
+  apt_repository: repo='ppa:ondrej/php'
+              state=present
+              update_cache=yes
+
+- name: PHP | install php packages
+  apt: pkg={{ item }} state=installed
+  with_items:
+    "{{ php7_packages }}"
