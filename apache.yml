@@ -13,14 +13,14 @@
 - name: Apache | Copy over vhosts configuration
   template:
     src: templates/apache/vhosts.conf.j2
-    dest: "/etc/apache2/sites-available/drupal"
+    dest: "/etc/apache2/sites-available/drupal.conf"
     owner: root
     group: root
     mode: 0600
 
 - name: Apache | Enable site
   file:
-    src: "/etc/apache2/sites-available/drupal"
-    dest: "/etc/apache2/sites-enabled/drupal"
+    src: "/etc/apache2/sites-available/drupal.conf"
+    dest: "/etc/apache2/sites-enabled/drupal.conf"
     state: link
   

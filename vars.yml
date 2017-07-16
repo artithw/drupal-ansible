@@ -1,11 +1,11 @@
 ---
 mysql_root_home: /root
-mysql_root_username: 'root'
-mysql_root_password: "^superSecurePassword123$"
+mysql_root_username: "root"
+mysql_root_password: "SuperSecurePassword123"
 
 drupal_db:
   user: drupal
-  password: "wo#24n$fTD&CqNSqD6"
+  password: "tilInTIngyrAtr"
   name: drupal
 
 mysql_users:
@@ -35,6 +35,12 @@ php7_packages:
   - php7.0-intl
   - php7.0-bz2
   - php7.0-xml
+  - libapache2-mod-php7.0
 
-drush_version: 8.1.12
-drush_phar_url: https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar
+drush_version: "8.1.12"
+drush_phar_url: "https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar"
+drupal_docroot: "/var/www/html/drupal"
+
+drupal_site_name: "Test site"
+drupal_account_name: "admin"
+drupal_account_pass: "admin123"
