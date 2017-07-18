@@ -1,16 +1,24 @@
 ---
 - hosts: all
-
+  gather_facts: no
   vars_files:
     - vars.yml
 
   tasks:
     - include: mysql.yml
     - include: php.yml
-    - include: apache.yml
+    - include: "{{ webserver }}.yml"
     - include: extras.yml
     - include: drupal.yml
   handlers:
     - name: restart apache
       service: name=apache2 state=restarted
+      when: webserver == "apache"
+    - name: restart nginx
+      service: name=nginx state=restarted
+      notify: restart php-fpm
+      when: webserver == "nginx"
+    - name: restart php-fpm
+      service: name="php{{ php_version }}-fpm" state=restarted
+      when: webserver == "nginx"
 

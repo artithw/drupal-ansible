@@ -38,7 +38,6 @@ php_packages:
   - "php{{ php_version }}-intl"
   - "php{{ php_version }}-bz2"
   - "php{{ php_version }}-xml"
-  - "libapache2-mod-php{{ php_version }}"
 
 drush_version: "8.1.12"
 drush_phar_url: "https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar"
@@ -47,3 +46,6 @@ drupal_docroot: "/var/www/html/drupal"
 drupal_site_name: "Test site"
 drupal_account_name: "admin"
 drupal_account_pass: "admin123"
+
+# webserver: "apache"
+webserver: "nginx"

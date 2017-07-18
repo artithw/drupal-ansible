@@ -4,6 +4,7 @@
   with_items:
     - apache2
     - apache2-utils
+    - "libapache2-mod-php{{ php_version }}"
 
 - name: Apache | Enable modules
   apache2_module:
