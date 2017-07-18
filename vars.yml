@@ -19,23 +19,26 @@ mysql_databases:
     encoding: utf8mb4
     collation: utf8mb4_general_ci
 
-php7_packages:
-  - php7.0-fpm
-  - php7.0-cli
-  - php7.0-common
-  - php7.0-curl
-  - php7.0-json
-  - php7.0-gd
-  - php7.0-mcrypt
-  - php7.0-odbc
-  - php7.0-mbstring
-  - php7.0-mysql
-  - php7.0-xmlrpc
-  - php7.0-opcache
-  - php7.0-intl
-  - php7.0-bz2
-  - php7.0-xml
-  - libapache2-mod-php7.0
+php_version: "5.6"
+#php_version: "7.0"
+php_packages:
+  - "php{{ php_version }}"
+  - "php{{ php_version }}-fpm"
+  - "php{{ php_version }}-cli"
+  - "php{{ php_version }}-common"
+  - "php{{ php_version }}-curl"
+  - "php{{ php_version }}-json"
+  - "php{{ php_version }}-gd"
+  - "php{{ php_version }}-mcrypt"
+  - "php{{ php_version }}-odbc"
+  - "php{{ php_version }}-mbstring"
+  - "php{{ php_version }}-mysql"
+  - "php{{ php_version }}-xmlrpc"
+  - "php{{ php_version }}-opcache"
+  - "php{{ php_version }}-intl"
+  - "php{{ php_version }}-bz2"
+  - "php{{ php_version }}-xml"
+  - "libapache2-mod-php{{ php_version }}"
 
 drush_version: "8.1.12"
 drush_phar_url: "https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar"
