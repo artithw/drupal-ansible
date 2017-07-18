@@ -10,5 +10,7 @@
     - include: apache.yml
     - include: extras.yml
     - include: drupal.yml
-      
+  handlers:
+    - name: restart apache
+      service: name=apache2 state=restarted
 
