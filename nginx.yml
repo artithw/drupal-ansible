@@ -1,0 +1,29 @@
+---
+- name: Nginx | Install Nginx
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - nginx
+    - "php{{ php_version }}-fpm"
+
+- name: Nginx | Copy over vhosts configuration
+  template:
+    src: templates/nginx/vhosts.conf.j2
+    dest: "/etc/nginx/sites-available/drupal.conf"
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart nginx
+
+- name: Nginx | Enable site
+  file:
+    src: "/etc/nginx/sites-available/drupal.conf"
+    dest: "/etc/nginx/sites-enabled/drupal.conf"
+    state: link
+  notify: restart nginx
+
+- name: Nginx | Disable default site
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  notify: restart nginx
+
