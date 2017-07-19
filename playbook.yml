@@ -1,5 +1,32 @@
 ---
-- hosts: all
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    do_ssh_keys: 10851099
+  tasks:
+    - name: Create new Droplet.
+      digital_ocean:
+        state: present
+        command: droplet
+        name: ansible-drupal
+        size_id: 1gb
+        image_id: ubuntu-16-04-x64
+        region_id: blr1
+        ssh_key_ids: "{{ do_ssh_keys }}"
+        unique_name: yes
+      register: drupal
+
+    - name: Add new host to our inventory.
+      add_host:
+        name: "{{ drupal.droplet.ip_address }}"
+        groups: drupal_group
+        ansible_ssh_private_key_file: /home/lakshmi/.ssh/id_ansible_drupal
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_user: root
+      when: drupal.droplet is defined
+
+- hosts: drupal_group
   gather_facts: no
   vars_files:
     - secrets.yml
@@ -13,6 +40,8 @@
     php_version: "7.0"
     drupal_account_name:  "{{ vault_drupal_account_name }}"
     drupal_account_pass: "{{ vault_drupal_account_pass }}"
+  pre_tasks:
+    - name: Wait for port 22 to become available.
+      local_action: "wait_for port=22 host={{ inventory_hostname }}"
   roles:
     - lakshminp.drupal
-
