@@ -1,9 +1,18 @@
 ---
 - hosts: all
   gather_facts: no
+  vars_files:
+    - secrets.yml
   vars:
+    mysql_root_password: "{{ vault_mysql_root_password }}"
+    drupal_db:
+      user: "{{ vault_drupal_db_user }}"
+      password: "{{ vault_drupal_db_password }}"
+      name: drupal
+
     php_version: "7.0"
-    drupal_account_pass: "admin"
+    drupal_account_name:  "{{ vault_drupal_account_name }}"
+    drupal_account_pass: "{{ vault_drupal_account_pass }}"
   roles:
     - lakshminp.drupal
 
