@@ -1,0 +1,17 @@
+galaxy_info:
+  author: Lakshmi Narasimhan
+  description: A role to install Drupal
+  company: Lakshminp
+  license: license (GPLv2)
+
+  min_ansible_version: 2.3
+
+  platforms:
+  - name: Ubuntu
+    versions:
+      - 16.04
+
+  galaxy_tags:
+    - drupal
+    - php
+    - cms

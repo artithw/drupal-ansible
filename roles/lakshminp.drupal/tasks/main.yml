@@ -1,0 +1,6 @@
+---
+- include: mysql.yml
+- include: php.yml
+- include: "{{ webserver }}.yml"
+- include: extras.yml
+- include: drupal.yml

@@ -1,26 +1,7 @@
 ---
 mysql_root_home: /root
 mysql_root_username: "root"
-mysql_root_password: "SuperSecurePassword123"
 
-drupal_db:
-  user: drupal
-  password: "tilInTIngyrAtr"
-  name: drupal
-
-mysql_users:
-  - name: "{{ drupal_db.user }}"
-    host: "%"
-    password: "{{ drupal_db.password }}"
-    priv: "{{ drupal_db.name }}.*:ALL"
-
-mysql_databases:
-  - name: "{{ drupal_db.name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
-
-php_version: "5.6"
-#php_version: "7.0"
 php_packages:
   - "php{{ php_version }}"
   - "php{{ php_version }}-fpm"
@@ -41,21 +22,8 @@ php_packages:
 
 drush_version: "8.1.12"
 drush_phar_url: "https://github.com/drush-ops/drush/releases/download/{{ drush_version }}/drush.phar"
-drupal_docroot: "/var/www/html/drupal"
 
 composer_phar_url: "http://getcomposer.org/composer.phar"
-
-drupal_site_name: "Test site"
-drupal_account_name: "admin"
-drupal_account_pass: "admin123"
-
-# webserver: "apache"
-webserver: "nginx"
-
-drupal_version_branches:
-
-#drupal_major_version: 7
-drupal_major_version: 8
 drupal_7_branch: "7.x"
 drupal_8_branch: "8.4.x"
 drupal_version_branch: "{{ drupal_8_branch if drupal_major_version == 8 else drupal_7_branch }}"

@@ -1,0 +1,28 @@
+---
+mysql_root_password: "SuperSecurePassword123"
+
+drupal_db:
+  user: drupal
+  password: "tilInTIngyrAtr"
+  name: drupal
+
+mysql_users:
+  - name: "{{ drupal_db.user }}"
+    host: "%"
+    password: "{{ drupal_db.password }}"
+    priv: "{{ drupal_db.name }}.*:ALL"
+
+mysql_databases:
+  - name: "{{ drupal_db.name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
+
+drupal_docroot: "/var/www/html/drupal"
+php_version: "5.6"
+webserver: "nginx"
+
+drupal_site_name: "Test site"
+drupal_account_name: "admin"
+drupal_account_pass: "admin123"
+
+drupal_major_version: 8
