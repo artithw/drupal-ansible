@@ -4,8 +4,7 @@
   vars:
     mysql_root_home: /root
     mysql_root_username: 'root'
-    mysql_root_password: 'root'
-    #mysql_root_password: ^superSecurePassword123$
+    mysql_root_password: "^superSecurePassword123$"
 
     drupal_db:
       user: drupal
@@ -56,14 +55,6 @@
         - mysql-server
         - python3-mysqldb
 
-    - name: Copy .my.cnf file with root password credentials.
-      template:
-        src: templates/root-my.cnf.j2
-        dest: "{{ mysql_root_home }}/.my.cnf"
-        owner: root
-        group: root
-        mode: 0600
-
     - name: Disallow root login remotely
       command: 'mysql -NBe "{{ item }}"'
       with_items:
@@ -73,11 +64,24 @@
       command: mysql -NBe "SELECT Host FROM mysql.user WHERE User = '{{ mysql_root_username }}' ORDER BY (Host='localhost') ASC"
       register: mysql_root_hosts
 
+
+    # MySQL gets installed with a default login of 'root' and no password.
+    # For a properly secured automated MySQL install, the below 2 tasks must be run in the respective order so that
+    # subsequent commands use the my.cnf file to read credentials.
+    # Source: http://docs.ansible.com/ansible/mysql_user_module.html
     - name: Update MySQL root password for localhost root account (5.7.x).
       shell: >
         mysql -u root -NBe
         'ALTER USER "{{ mysql_root_username }}"@"{{ item }}" IDENTIFIED WITH mysql_native_password BY "{{ mysql_root_password }}";'
       with_items: "{{ mysql_root_hosts.stdout_lines|default([]) }}"
+
+    - name: Copy .my.cnf file with root password credentials.
+      template:
+        src: .my.cnf
+        dest: "{{ mysql_root_home }}/.my.cnf"
+        owner: root
+        group: root
+        mode: 0600
 
     - name: MySQL | Ensure MySQL users are present.
       mysql_user:
