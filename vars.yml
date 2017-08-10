@@ -54,8 +54,8 @@ webserver: "nginx"
 
 drupal_version_branches:
 
-#drupal_major_version: 7
-drupal_major_version: 8
+drupal_major_version: 7
+#drupal_major_version: 8
 drupal_7_branch: "7.x"
 drupal_8_branch: "8.4.x"
 drupal_version_branch: "{{ drupal_8_branch if drupal_major_version == 8 else drupal_7_branch }}"

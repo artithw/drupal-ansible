@@ -2,7 +2,7 @@
 - name: Drupal | Get the latest stable version(7)
   git:
     repo: "https://github.com/drupal/drupal.git"
-    version: "{{ drupal_8_branch }}"
+    version: "{{ drupal_version_branch }}"
     dest: "{{ drupal_docroot }}"
     depth: 1
 
